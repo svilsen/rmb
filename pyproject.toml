@@ -6,6 +6,22 @@ build-backend = "scikit_build_core.build"
 name = "rmb"
 version = "0.1.0"
 requires-python = ">=3.9"
+license = "MIT"
+license-files = ["LICEN[CS]E.*"]
+authors = [
+    {name = "Søren B. Vilsen", email = "svilsen@mp.aau.dk"}
+]
+maintainers = [
+    {name = "Søren B. Vilsen", email = "svilsen@mp.aau.dk"}
+]
+description = "Counting lattice points in a Manhattan ball on a restriced grid."
+readme = "README.md"
+keywords = ["counting lattice points", "manhattan ball", "restricted grid", "python", "c++"]
+classifiers = [
+    "Development Status :: 3 - Alpha", 
+    "Programming Language :: Python :: 3",
+    "Programming Language :: C++"
+]
 
 [tool.scikit-build]
 wheel.packages = ["src/rmb"]
