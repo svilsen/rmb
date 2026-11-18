@@ -1,13 +1,57 @@
 #pragma once
+#include <cstdint>
 #include <vector>
 
 namespace rmb {
-    unsigned long long choose(int n, int k);
-    unsigned long long delannoy(int m, int n);
+    std::uint64_t choose(
+        const std::uint64_t & n, 
+        std::uint64_t k
+    );
 
-    int r_st(const int & r, const std::vector<int> & km, const std::vector<int> & kp, const std::vector<int> & c, const std::vector<int> & S, const std::vector<int> & T);
+    std::uint64_t delannoy(
+        const std::uint64_t & m, 
+        const std::uint64_t & n
+    );
 
-    unsigned long long bruteforce(const int & d, const int & r, const std::vector<int>& km, const std::vector<int>& kp, const std::vector<int>& c);
-    long long exact(int & d, int & r, const std::vector<int> & km, const std::vector<int> & kp, const std::vector<int> & c);
-    std::pair<long long, double> approximate(int & d, const int & r, const std::vector<int>& km, const std::vector<int>& kp, const std::vector<int>& c);
+    std::int64_t r_st(
+        const std::uint64_t & r,
+        const std::vector<std::uint64_t> & km,
+        const std::vector<std::uint64_t> & kp,
+        const std::vector<std::int64_t> & c,
+        const std::vector<std::uint64_t> & S,
+        const std::vector<std::uint64_t> & T
+    );
+
+    std::uint64_t bruteforce(
+        const std::uint64_t & d,
+        const std::uint64_t & r,
+        const std::vector<std::uint64_t> & km,
+        const std::vector<std::uint64_t> & kp,
+        const std::vector<std::int64_t> & c
+    );
+
+    std::int64_t exact(
+        const std::uint64_t & d,
+        const std::uint64_t & r,
+        const std::vector<std::uint64_t> & km,
+        const std::vector<std::uint64_t> & kp,
+        const std::vector<std::int64_t> & c
+    );
+
+    std::uint64_t dp(
+        const std::uint64_t & d,
+        const std::uint64_t & r,
+        const std::vector<std::uint64_t> & km,
+        const std::vector<std::uint64_t> & kp,
+        const std::vector<std::int64_t> & c
+    );
+
+    //
+    std::pair<uint64_t, double> approximate(
+        const std::uint64_t & d,
+        const std::uint64_t & r,
+        const std::vector<std::uint64_t> & km,
+        const std::vector<std::uint64_t> & kp,
+        const std::vector<std::int64_t> & c
+    );
 }

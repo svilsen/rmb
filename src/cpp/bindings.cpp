@@ -6,6 +6,7 @@
 PYBIND11_MODULE(_core, m) {
     m.def("bruteforce", &rmb::bruteforce);
     m.def("exact", &rmb::exact);
+    m.def("dp", &rmb::dp);
     m.def("approximate", &rmb::approximate);
 }
 
