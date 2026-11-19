@@ -1,6 +1,8 @@
 #include <algorithm>
 #include <cstdint>
 #include <vector>
+#include <map>
+
 #include <rmb/restricted_manhattan_ball.hpp>
 
 namespace rmb {
@@ -260,5 +262,249 @@ namespace rmb {
         }
 
         return {estimate, bound};
+    }
+
+
+    void groups_create(
+        std::map<std::pair<std::uint64_t, std::uint64_t>, std::uint64_t> & _groups,
+        std::uint64_t & _md,
+        const std::uint64_t & d,
+        const std::vector<std::uint64_t> & km,
+        const std::vector<std::uint64_t> & kp,
+        const std::vector<std::int64_t> & c
+    ) {
+        for (std::uint64_t i = 0; i < d; ++i) {
+            std::uint64_t a = km[i] + c[i];
+            std::uint64_t b = kp[i] - c[i];
+
+            _groups[{a, b}]++;
+            _md += std::max(a, b);
+        }
+    }
+
+    void group_choices(
+        std::vector<std::vector<std::uint64_t>> & _s,
+        std::vector<std::vector<std::uint64_t>> & _costs,
+        std::vector<std::vector<std::uint64_t>> & _weights,
+        const std::map<std::pair<std::uint64_t, std::uint64_t>, std::uint64_t> & groups,
+        const std::uint64_t & r
+    ) {
+        for (const auto & [ab, m] : groups) {
+            auto [a, b] = ab;
+
+            std::vector<std::uint64_t> s, cost, weight;
+            for (std::uint64_t t = 0; t <= m; ++t) {
+                for (std::uint64_t u = 0; u <= m - t; ++u) {
+                    unsigned __int128 q =
+                        static_cast<unsigned __int128>(t) * (a + 1) +
+                        static_cast<unsigned __int128>(u) * (b + 1);
+
+                    if (q > r) continue;
+
+                    s.push_back(t + u);
+                    cost.push_back(static_cast<std::uint64_t>(q));
+                    weight.push_back(choose(m, t) * choose(m - t, u));
+                }
+            }
+
+            _s.push_back(std::move(s));
+            _costs.push_back(std::move(cost));
+            _weights.push_back(std::move(weight));
+        }
+    }
+
+    std::int64_t grouped_exact(
+        const std::uint64_t & d,
+        const std::uint64_t & r,
+        const std::vector<std::uint64_t> & km,
+        const std::vector<std::uint64_t> & kp,
+        const std::vector<std::int64_t> & c
+    ) {
+        ////
+        //
+        std::map<std::pair<std::uint64_t, std::uint64_t>, std::uint64_t> groups;
+        std::uint64_t md = 0;
+        groups_create(groups, md, d, km, kp, c);
+
+        //
+        std::vector<std::vector<std::uint64_t>> ss, costs, weights;
+        group_choices(ss, costs, weights, groups, r); 
+    
+        ////
+        //
+        std::vector<std::size_t> indices(groups.size(), 0);
+
+        //
+        std::int64_t total = 0;
+        bool done = false;
+        while (!done) {
+            ////
+            //
+            std::uint64_t s = 0, cost = 0, weight = 1;
+            for (std::size_t i = 0; i < indices.size(); ++i) {
+                s += ss[i][indices[i]];
+                cost += costs[i][indices[i]];
+                weight *= weights[i][indices[i]];
+            }
+
+            //
+            std::int64_t sign = (s % 2) ? -1 : 1;
+            if (cost <= r) {
+                std::uint64_t n = r - cost;
+                std::uint64_t inner = 0;
+
+                for (std::uint64_t j = 0; j <= n; ++j) {
+                    std::uint64_t coef = (s == 0) ? (j == 0 ? 1 : 0) : choose(j + s - 1, s - 1);
+                    inner += coef * delannoy(d - s, n - j);
+                }
+
+                std::int64_t contribution = static_cast<std::int64_t>(weight * inner);
+
+                total += sign * contribution;
+            }
+
+            //
+            for (std::size_t i = 0; i < indices.size(); ++i) {
+                if (++indices[i] < ss[i].size()) {
+                    break;
+                }
+
+                indices[i] = 0;
+                if (i == indices.size() - 1) done = true;
+            }
+        }
+
+        return total;
+    }
+
+    std::pair<std::uint64_t, double> grouped_approximate(
+        const std::uint64_t & d,
+        const std::uint64_t & r,
+        const std::vector<std::uint64_t> & km,
+        const std::vector<std::uint64_t> & kp,
+        const std::vector<std::int64_t> & c
+    ) {
+        ////
+        //
+        std::map<std::pair<std::uint64_t, std::uint64_t>, std::uint64_t> groups;
+        std::uint64_t md = 0;
+        groups_create(groups, md, d, km, kp, c);
+
+        //
+        std::vector<std::vector<std::uint64_t>> ss, costs, weights;
+        group_choices(ss, costs, weights, groups, r); 
+
+        ////
+        //
+        std::vector<std::size_t> indices(groups.size(), 0);
+
+        //
+        std::uint64_t estimate = 0;
+        double bound = 0.0;
+
+        //
+        bool done = false;
+        while (!done) {
+            ////
+            //
+            std::uint64_t s = 0, cost = 0, weight = 1;
+            for (std::size_t i = 0; i < indices.size(); ++i) {
+                s += ss[i][indices[i]];
+                cost += costs[i][indices[i]];
+                weight *= weights[i][indices[i]];
+            }
+
+            //
+            std::int64_t sign = s % 2 == 0 ? 1 : -1;
+            if (cost <= r) {
+                std::uint64_t n = r - cost;
+                std::uint64_t lt = (std::uint64_t{1} << (d - s)) * choose(n + d, d);
+                std::uint64_t contribution = weight * lt;
+
+                estimate += sign * contribution;
+                bound += static_cast<double>(contribution) * d * (d - s) / (2.0 * (n + 1));
+            }
+
+            //
+            for (std::size_t i = 0; i < indices.size(); ++i) {
+                if (++indices[i] < ss[i].size()) {
+                    break;
+                }
+
+                indices[i] = 0;
+                if (i == indices.size() - 1) {
+                    done = true;
+                }
+            }
+        }
+
+        //
+        return {estimate, bound};
+    }
+
+    std::uint64_t grouped_dp(
+        const std::uint64_t & d,
+        const std::uint64_t & r,
+        const std::vector<std::uint64_t> & km,
+        const std::vector<std::uint64_t> & kp,
+        const std::vector<std::int64_t> & c
+    ) {
+        ////
+        //
+        std::map<std::pair<std::uint64_t, std::uint64_t>, std::uint64_t> groups;
+        std::uint64_t md = 0;
+        groups_create(groups, md, d, km, kp, c);
+
+        //
+        const std::uint64_t r_adj = std::min(r, md);
+        std::vector<std::uint64_t> crt(r_adj + 1, 0);
+        std::vector<std::uint64_t> nxt(r_adj + 1, 0);
+
+        //
+        crt[0] = 1;
+        for (const auto & [ab, multiplicity] : groups) {
+            ////
+            //
+            const auto [a, b] = ab;
+            for (std::uint64_t k = 0; k < multiplicity; ++k) {
+                ////
+                //
+                std::uint64_t wa = 0;
+                std::uint64_t wb = 0;
+                for (std::uint64_t j = 0; j <= r_adj; ++j) {
+                    if (j > 0) {
+                        if (j > a) {
+                            wa -= crt[j - a - 1];
+                        }
+
+                        wa += crt[j - 1];
+                    }
+
+                    if (j > 0) {
+                        if (j > b) {
+                            wb -= crt[j - b - 1];
+                        }
+
+                        wb += crt[j - 1];
+                    }
+
+                    nxt[j] = crt[j] + wa + wb;
+                }
+
+                //
+                crt.swap(nxt);
+                std::fill(nxt.begin(), nxt.end(), 0);
+            }
+        }
+
+        ////
+        //
+        std::uint64_t count = 0;
+        for (const std::uint64_t x : crt) {
+            count += x;
+        }
+
+        //
+        return count;
     }
 }

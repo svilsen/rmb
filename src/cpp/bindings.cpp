@@ -8,5 +8,8 @@ PYBIND11_MODULE(_core, m) {
     m.def("exact", &rmb::exact);
     m.def("dp", &rmb::dp);
     m.def("approximate", &rmb::approximate);
+    m.def("grouped_exact", &rmb::grouped_exact);
+    m.def("grouped_dp", &rmb::grouped_dp);
+    m.def("grouped_approximate", &rmb::grouped_approximate);
 }
 
