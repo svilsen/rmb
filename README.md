@@ -44,16 +44,16 @@ kp = [4, 3]
 c = [2, 3]
 
 restricted_manhattan_ball(d, r, km, kp, c, "bruteforce")
-# (9, 0)
+# 9
 
 restricted_manhattan_ball(d, r, km, kp, c, "exact")
-# (9, 0)
+# 9
 
 restricted_manhattan_ball(d, r, km, kp, c, "dynamic")
-# (9, 0)
+# 9
 
 restricted_manhattan_ball(d, r, km, kp, c, "approximate")
-# (18, 12)
+# (18, 19.0)
 ```
 
 ### Using the C++ library directly
