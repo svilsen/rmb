@@ -71,7 +71,7 @@ namespace rmb {
     ) {
         std::vector<std::int64_t> low(d), high(d), u(d);
         for (std::uint64_t i = 0; i < d; i++) {
-            low[i] = -km[i];
+            low[i] = -static_cast<int64_t>(km[i]);
             high[i] = kp[i];
             u[i] = low[i];
         }
@@ -277,7 +277,7 @@ namespace rmb {
             std::uint64_t a = km[i] + c[i];
             std::uint64_t b = kp[i] - c[i];
 
-            _groups[{a, b}]++;
+            _groups[{std::min(a, b), std::max(a, b)}]++;
             _md += std::max(a, b);
         }
     }
