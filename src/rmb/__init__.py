@@ -2,13 +2,12 @@ from importlib.metadata import version
 
 from . import _core
 
-def restricted_manhattan_ball(d: int, r: int, km: list[int], kp: list[int], c: list[int], method: str = "dynamic", type: bool = True) -> int | tuple[int, float] :
+def rmb(r: int, km: list[int], kp: list[int], c: list[int], method: str = "dynamic", type: bool = True) -> int | tuple[int, float] :
     """Count lattice points of a Manhattan ball in a bounded rectangular grid.
 
     Counts the number of points in the grid G = {-km_1, ..., kp_1} x ... x {-km_d, ..., kp_d} satisfying sum_i |u_i - c_i| <= r, i.e. the size |B(c | r, G)|.
 
     Args:
-        d: Dimension of the grid.
         r: Radius of the Manhattan ball.
         km: Lower extents k^- = (km_1, ..., km_d).
         kp: Upper extents k^+ = (kp_1, ..., kp_d).
@@ -29,6 +28,12 @@ def restricted_manhattan_ball(d: int, r: int, km: list[int], kp: list[int], c: l
     """
     ##
     #
+    d = len(km)
+    if d < 1 :
+        raise ValueError(
+            f"'d' was inferred from length of 'km', but was found to be zero; 'd' has to be > 0."
+        )
+
     if (len(km) != d) or (len(kp) != d) or (len(c) != d) :
         raise ValueError(
             f"'km', 'kp' and 'c' must each have length d = {d}; got len(km) = {len(km)}, len(kp) = {len(kp)}, len(c) = {len(c)}."
@@ -67,4 +72,5 @@ def restricted_manhattan_ball(d: int, r: int, km: list[int], kp: list[int], c: l
         return count
 
 __version__ = version("rmb")
-__all__ = ["restricted_manhattan_ball"]
+__all__ = ["rmb"]
+
