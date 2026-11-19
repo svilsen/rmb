@@ -5,7 +5,10 @@
 [![C++17](https://img.shields.io/badge/C%2B%2B-17-blue.svg)](https://en.cppreference.com/w/cpp/17)
 [![Status: alpha](https://img.shields.io/badge/status-alpha-orange.svg)](#project-status)
 
-The library `rmb` counts the integer lattice points that lie inside a Manhattan (L1) ball while being restricted to a bounded grid. The counting is implemented in C++ and exposed to Python through [pybind11](https://github.com/pybind/pybind11), so you get native speed with a Python interface.
+The library `rmb` counts the integer lattice points that lie inside a Manhattan (L1) ball while being restricted to a bounded grid. 
+<img width="1071" height="916" alt="ie_explainer" src="https://github.com/user-attachments/assets/19601845-051e-4315-b1c5-3361cd0d0da2" />
+
+The counting is implemented in C++ and exposed to Python through [pybind11](https://github.com/pybind/pybind11), so you get native speed with a Python interface.
 
 ## Installation
 ### Requirements
