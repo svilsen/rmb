@@ -21,8 +21,9 @@ namespace rmb {
         }
 
         unsigned __int128 res = 1;
-        for (unsigned __int128 i = 1; i <= k; i++) {
-            res = res * (n - k + i) / i;
+        for (std::uint64_t i = 1; i <= k; i++) {
+            unsigned __int128 mult_i = static_cast<unsigned __int128>((n - k + i) / i); 
+            res *= mult_i;
         }
 
         return static_cast<std::uint64_t>(res);
@@ -67,16 +68,16 @@ namespace rmb {
     // 
     void create_md(
         std::uint64_t & _md,
-        std::vector<std::int64_t> & _a,
-        std::vector<std::int64_t> _b,
+        std::vector<std::uint64_t> & _a,
+        std::vector<std::uint64_t> & _b,
         const std::uint64_t & d,
         const std::vector<std::uint64_t> & km,
         const std::vector<std::uint64_t> & kp,
         const std::vector<std::int64_t> & c
     ) {
         for (std::uint64_t i = 0; i < d; ++i) {
-            _a[i] = static_cast<std::int64_t>(km[i]) + c[i];
-            _b[i] = static_cast<std::int64_t>(kp[i]) - c[i];
+            _a[i] = km[i] + c[i];
+            _b[i] = kp[i] - c[i];
 
             const std::uint64_t m = std::max(_a[i], _b[i]);
             _md += m;
@@ -227,7 +228,7 @@ namespace rmb {
     ) {
         ////
         //
-        std::vector<std::int64_t> a(d), b(d);
+        std::vector<std::uint64_t> a(d), b(d);
         std::uint64_t md = 0;
         create_md(md, a, b, d, km, kp, c);
 
@@ -361,7 +362,7 @@ namespace rmb {
     ) {
         ////
         //
-        std::vector<std::int64_t> a(d), b(d);
+        std::vector<std::uint64_t> a(d), b(d);
         std::uint64_t md = 0;
         create_md(md, a, b, d, km, kp, c);
 
@@ -375,7 +376,7 @@ namespace rmb {
         for (std::uint64_t i = 0; i < d; i++) {
             std::uint64_t wa = 0;
             std::uint64_t wb = 0;
-            for (std::int64_t j = 0; j <= r_adj; j++) {
+            for (std::uint64_t j = 0; j <= r_adj; j++) {
                 if (j > 0) {
                     if (j > a[i]) {
                         wa -= crt[j - a[i] - 1];
@@ -396,7 +397,6 @@ namespace rmb {
             }
 
             crt.swap(nxt);
-            std::fill(nxt.begin(), nxt.end(), 0);
         }
 
         std::uint64_t count = 0;
@@ -437,7 +437,7 @@ namespace rmb {
                 //
                 std::uint64_t wa = 0;
                 std::uint64_t wb = 0;
-                for (std::int64_t j = 0; j <= r_adj; ++j) {
+                for (std::uint64_t j = 0; j <= r_adj; ++j) {
                     if (j > 0) {
                         if (j > a) {
                             wa -= crt[j - a - 1];
@@ -459,7 +459,6 @@ namespace rmb {
 
                 //
                 crt.swap(nxt);
-                std::fill(nxt.begin(), nxt.end(), 0);
             }
         }
 
@@ -485,7 +484,7 @@ namespace rmb {
     ) {
         ////
         //
-        std::vector<std::int64_t> a(d), b(d);
+        std::vector<std::uint64_t> a(d), b(d);
         std::uint64_t md = 0;
         create_md(md, a, b, d, km, kp, c);
 
@@ -497,7 +496,7 @@ namespace rmb {
         double bound = 0;
         for (int Sbits = 0; Sbits < (1 << d); Sbits++) {
             std::vector<std::uint64_t> S;
-            for (int i = 0; i < d; ++i) {
+            for (std::uint64_t i = 0; i < d; i++) {
                 if (Sbits >> i & 1) {
                     S.push_back(i);
                 }
