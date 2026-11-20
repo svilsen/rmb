@@ -40,7 +40,7 @@ def rmb(r: int, km: list[int], kp: list[int], c: list[int], method: str = "dynam
         raise ValueError(
             f"'d = len(km)' = {d}, but d must be >= 1."
         )
-    elif d > PRECISION : 
+    elif d > PRECISION :
         raise ValueError(
             f"'d' = {d}, but 'd' must be <= 63 ('d' is stored as a uint64_t in the C++ code and computes '1 << d', which is undefined for 'd' >= {PRECISION + 1})."
         )
@@ -59,7 +59,7 @@ def rmb(r: int, km: list[int], kp: list[int], c: list[int], method: str = "dynam
         )
 
     #
-    if r > UPPER_BOUND_GENENRAL : 
+    if r > UPPER_BOUND_GENENRAL :
         raise ValueError(
             f"'r' = {r}, but 'r' must be <= 2**{PRECISION} - 1 = {UPPER_BOUND_GENENRAL} ('r' is stored as an int64_t in the C++ code)."
         )
@@ -130,19 +130,19 @@ def rmb(r: int, km: list[int], kp: list[int], c: list[int], method: str = "dynam
     ##
     #
     error = 0
-    if method == "bf" or method == "bruteforce" :
+    if method == "b" or method == "bf" or method == "bruteforce" :
         count = _core.bruteforce(d, r, km, kp, c)
-    elif method == "ext" or method == "exact":
+    elif method == "e" or method == "ext" or method == "exact":
         if type :
             count = _core.exact_grp(d, r, km, kp, c)
         else :
             count = _core.exact(d, r, km, kp, c)
-    elif method == "dp" or method == "dynamic":
+    elif method == "d" or method == "dp" or method == "dynamic":
         if type :
             count = _core.dp_grp(d, r, km, kp, c)
         else :
             count = _core.dp(d, r, km, kp, c)
-    elif method == "app" or method == "approximate":
+    elif method == "a" or method == "app" or method == "approximate":
         if d > 30 :
             raise ValueError(
                 f"'d' = {d}, but 'd' must be <= 30 ('d' is stored as an int in the C++ code and computes '1 << d', which is undefined for 'd' >= {PRECISION + 1})."

@@ -21,7 +21,7 @@ namespace rmb {
         }
 
         unsigned __int128 res = 1;
-        for (std::uint64_t i = 1; i <= k; ++i) {
+        for (unsigned __int128 i = 1; i <= k; i++) {
             res = res * (n - k + i) / i;
         }
 
@@ -64,6 +64,25 @@ namespace rmb {
         return n;
     }
 
+    // 
+    void create_md(
+        std::uint64_t & _md,
+        std::vector<std::int64_t> & _a,
+        std::vector<std::int64_t> _b,
+        const std::uint64_t & d,
+        const std::vector<std::uint64_t> & km,
+        const std::vector<std::uint64_t> & kp,
+        const std::vector<std::int64_t> & c
+    ) {
+        for (std::uint64_t i = 0; i < d; ++i) {
+            _a[i] = static_cast<std::int64_t>(km[i]) + c[i];
+            _b[i] = static_cast<std::int64_t>(kp[i]) - c[i];
+
+            const std::uint64_t m = std::max(_a[i], _b[i]);
+            _md += m;
+        }
+    }
+
     ////
     //
     void create_grp(
@@ -94,17 +113,19 @@ namespace rmb {
             auto [a, b] = ab;
 
             std::vector<std::uint64_t> s, cost, weight;
-            for (std::uint64_t t = 0; t <= m; ++t) {
-                for (std::uint64_t u = 0; u <= m - t; ++u) {
-                    unsigned __int128 q =
-                        static_cast<unsigned __int128>(t) * (a + 1) +
-                        static_cast<unsigned __int128>(u) * (b + 1);
+            for (std::uint64_t t = 0; t <= m; t++) {
+                for (std::uint64_t u = 0; u <= m - t; u++) {
+                    unsigned __int128 q = static_cast<unsigned __int128>(t) * (a + 1) + static_cast<unsigned __int128>(u) * (b + 1);
 
-                    if (q > r) continue;
+                    if (q > r) {
+                        continue;
+                    }
+
+                    unsigned __int128 qp = static_cast<unsigned __int128>(choose(m, t)) * static_cast<unsigned __int128>(choose(m - t, u));
 
                     s.push_back(t + u);
                     cost.push_back(static_cast<std::uint64_t>(q));
-                    weight.push_back(choose(m, t) * choose(m - t, u));
+                    weight.push_back(static_cast<std::uint64_t>(qp));
                 }
             }
 
@@ -177,16 +198,16 @@ namespace rmb {
         const std::uint64_t & n
     ) {
         //
-        const std::uint64_t i_max = std::min(d - s, n);
+        const unsigned __int128 i_max = static_cast<unsigned __int128>(std::min(d - s, n));
 
         //
-        std::uint64_t c1 = 1;
-        std::uint64_t c2 = choose(n + d, d);
+        unsigned __int128 c1 = 1;
+        unsigned __int128 c2 = static_cast<unsigned __int128>(choose(n + d, d));
 
         //
         unsigned __int128 inner = 0;
-        for (std::uint64_t i = 0; i <= i_max; ++i) {
-            inner += static_cast<unsigned __int128>(c1) * c2;
+        for (unsigned __int128 i = 0; i <= i_max; i++) {
+            inner += c1 * c2;
             if (i < i_max) {
                 c1 = c1 * (d - s - i) / (i + 1);
                 c2 = c2 * (n - i) / (n - i + d);
@@ -204,6 +225,16 @@ namespace rmb {
         const std::vector<std::uint64_t> & kp,
         const std::vector<std::int64_t> & c
     ) {
+        ////
+        //
+        std::vector<std::int64_t> a(d), b(d);
+        std::uint64_t md = 0;
+        create_md(md, a, b, d, km, kp, c);
+
+        //
+        std::uint64_t r_adj = std::min(r, md);
+
+        //
         std::int64_t total = 0;
         for (std::uint64_t Sbits = 0; Sbits < (std::uint64_t{1} << d); Sbits++) {
             std::vector<std::uint64_t> S;
@@ -223,7 +254,7 @@ namespace rmb {
                     }
                 }
 
-                std::int64_t n = r_st(r, km, kp, c, S, T);
+                std::int64_t n = r_st(r_adj, km, kp, c, S, T);
                 if (n < 0) {
                     continue;
                 }
@@ -238,7 +269,14 @@ namespace rmb {
             }
         }
 
-        return total;
+        //
+        std::uint64_t utotal = 0;
+        if (total >= 0) {
+            utotal = static_cast<std::uint64_t>(total);
+        }
+
+        //
+        return utotal;
     }
 
     //
@@ -256,13 +294,15 @@ namespace rmb {
         create_grp(groups, md, d, km, kp, c);
 
         //
+        std::uint64_t r_adj = std::min(r, md);
+
+        //
         std::vector<std::vector<std::uint64_t>> ss, costs, weights;
-        choices_grp(ss, costs, weights, groups, r); 
-    
+        choices_grp(ss, costs, weights, groups, r_adj); 
+
         ////
         //
         std::vector<std::size_t> indices(groups.size(), 0);
-        std::uint64_t r_adj = std::min(r, md);
 
         //
         std::int64_t total = 0;
@@ -300,7 +340,14 @@ namespace rmb {
             }
         }
 
-        return total;
+        //
+        std::uint64_t utotal = 0;
+        if (total >= 0) {
+            utotal = static_cast<std::uint64_t>(total);
+        }
+
+        //
+        return utotal;
     }
 
     ////
@@ -312,21 +359,18 @@ namespace rmb {
         const std::vector<std::uint64_t> & kp,
         const std::vector<std::int64_t> & c
     ) {
-
+        ////
+        //
         std::vector<std::int64_t> a(d), b(d);
         std::uint64_t md = 0;
-        for (std::uint64_t i = 0; i < d; ++i) {
-            a[i] = static_cast<std::int64_t>(km[i]) + c[i];
-            b[i] = static_cast<std::int64_t>(kp[i]) - c[i];
+        create_md(md, a, b, d, km, kp, c);
 
-            const std::uint64_t m = std::max(a[i], b[i]);
-            md += m;
-        }
-
+        //
         const std::uint64_t r_adj = std::min(r, md);
         std::vector<std::uint64_t> crt(r_adj + 1, 0);
         std::vector<std::uint64_t> nxt(r_adj + 1, 0);
 
+        //
         crt[0] = 1;
         for (std::uint64_t i = 0; i < d; i++) {
             std::uint64_t wa = 0;
@@ -439,6 +483,16 @@ namespace rmb {
         const std::vector<std::uint64_t> & kp,
         const std::vector<std::int64_t> & c
     ) {
+        ////
+        //
+        std::vector<std::int64_t> a(d), b(d);
+        std::uint64_t md = 0;
+        create_md(md, a, b, d, km, kp, c);
+
+        //
+        std::uint64_t r_adj = std::min(r, md);
+
+        //
         std::int64_t estimate = 0;
         double bound = 0;
         for (int Sbits = 0; Sbits < (1 << d); Sbits++) {
@@ -459,7 +513,7 @@ namespace rmb {
                     }
                 }
 
-                std::int64_t n = r_st(r, km, kp, c, S, T);
+                std::int64_t n = r_st(r_adj, km, kp, c, S, T);
                 if (n < 0) {
                     continue;
                 }
@@ -493,13 +547,15 @@ namespace rmb {
         create_grp(groups, md, d, km, kp, c);
 
         //
+        std::uint64_t r_adj = std::min(r, md);
+
+        //
         std::vector<std::vector<std::uint64_t>> ss, costs, weights;
-        choices_grp(ss, costs, weights, groups, r); 
+        choices_grp(ss, costs, weights, groups, r_adj); 
 
         ////
         //
         std::vector<std::size_t> indices(groups.size(), 0);
-        std::uint64_t r_adj = std::min(r, md);
 
         //
         std::int64_t estimate = 0;
