@@ -65,8 +65,25 @@ namespace rmb {
         return n;
     }
 
-    // 
+    //
     void create_md(
+        std::uint64_t & _md,
+        const std::uint64_t & d,
+        const std::vector<std::uint64_t> & km,
+        const std::vector<std::uint64_t> & kp,
+        const std::vector<std::int64_t> & c
+    ) {
+        for (std::uint64_t i = 0; i < d; ++i) {
+            std::uint64_t a = km[i] + c[i];
+            std::uint64_t b = kp[i] - c[i];
+
+            const std::uint64_t m = std::max(a, b);
+            _md += m;
+        }
+    }
+
+    //
+    void create_md_ab(
         std::uint64_t & _md,
         std::vector<std::uint64_t> & _a,
         std::vector<std::uint64_t> & _b,
@@ -86,6 +103,12 @@ namespace rmb {
 
     ////
     //
+    struct Choice {
+        std::uint64_t s;
+        std::uint64_t cost;
+        std::uint64_t weight;
+    };
+
     void create_grp(
         std::map<std::pair<std::uint64_t, std::uint64_t>, std::uint64_t> & _groups,
         std::uint64_t & _md,
@@ -104,16 +127,14 @@ namespace rmb {
     }
 
     void choices_grp(
-        std::vector<std::vector<std::uint64_t>> & _s,
-        std::vector<std::vector<std::uint64_t>> & _costs,
-        std::vector<std::vector<std::uint64_t>> & _weights,
+        std::vector<std::vector<Choice>> & _choices,
         const std::map<std::pair<std::uint64_t, std::uint64_t>, std::uint64_t> & groups,
         const std::uint64_t & r
     ) {
         for (const auto & [ab, m] : groups) {
             auto [a, b] = ab;
 
-            std::vector<std::uint64_t> s, cost, weight;
+            std::vector<Choice> choices;
             for (std::uint64_t t = 0; t <= m; t++) {
                 for (std::uint64_t u = 0; u <= m - t; u++) {
                     unsigned __int128 q = static_cast<unsigned __int128>(t) * (a + 1) + static_cast<unsigned __int128>(u) * (b + 1);
@@ -124,15 +145,12 @@ namespace rmb {
 
                     unsigned __int128 qp = static_cast<unsigned __int128>(choose(m, t)) * static_cast<unsigned __int128>(choose(m - t, u));
 
-                    s.push_back(t + u);
-                    cost.push_back(static_cast<std::uint64_t>(q));
-                    weight.push_back(static_cast<std::uint64_t>(qp));
+                    Choice grp_tu{t + u, static_cast<std::uint64_t>(q), static_cast<std::uint64_t>(qp)};
+                    choices.push_back(grp_tu);
                 }
             }
 
-            _s.push_back(std::move(s));
-            _costs.push_back(std::move(cost));
-            _weights.push_back(std::move(weight));
+            _choices.push_back(choices);
         }
     }
 
@@ -228,9 +246,8 @@ namespace rmb {
     ) {
         ////
         //
-        std::vector<std::uint64_t> a(d), b(d);
         std::uint64_t md = 0;
-        create_md(md, a, b, d, km, kp, c);
+        create_md(md, d, km, kp, c);
 
         //
         std::uint64_t r_adj = std::min(r, md);
@@ -298,8 +315,8 @@ namespace rmb {
         std::uint64_t r_adj = std::min(r, md);
 
         //
-        std::vector<std::vector<std::uint64_t>> ss, costs, weights;
-        choices_grp(ss, costs, weights, groups, r_adj); 
+        std::vector<std::vector<Choice>> choices;
+        choices_grp(choices, groups, r_adj); 
 
         ////
         //
@@ -313,9 +330,10 @@ namespace rmb {
             //
             std::uint64_t s = 0, cost = 0, weight = 1;
             for (std::size_t i = 0; i < indices.size(); ++i) {
-                s += ss[i][indices[i]];
-                cost += costs[i][indices[i]];
-                weight *= weights[i][indices[i]];
+                Choice & choice = choices[i][indices[i]];
+                s += choice.s;
+                cost += choice.cost;
+                weight *= choice.weight;
             }
 
             //
@@ -330,7 +348,7 @@ namespace rmb {
 
             //
             for (std::size_t i = 0; i < indices.size(); ++i) {
-                if (++indices[i] < ss[i].size()) {
+                if (++indices[i] < choices[i].size()) {
                     break;
                 }
 
@@ -364,7 +382,7 @@ namespace rmb {
         //
         std::vector<std::uint64_t> a(d), b(d);
         std::uint64_t md = 0;
-        create_md(md, a, b, d, km, kp, c);
+        create_md_ab(md, a, b, d, km, kp, c);
 
         //
         const std::uint64_t r_adj = std::min(r, md);
@@ -373,9 +391,12 @@ namespace rmb {
 
         //
         crt[0] = 1;
+        std::uint64_t rch = 0;
         for (std::uint64_t i = 0; i < d; i++) {
-            std::uint64_t wa = 0;
-            std::uint64_t wb = 0;
+            rch += std::max(a[i], b[i]);
+            const std::uint64_t jmax = std::min(r_adj, rch);
+
+            std::uint64_t wa = 0, wb = 0;
             for (std::uint64_t j = 0; j <= r_adj; j++) {
                 if (j > 0) {
                     if (j > a[i]) {
@@ -428,16 +449,18 @@ namespace rmb {
 
         //
         crt[0] = 1;
+        std::uint64_t rch = 0;
         for (const auto & [ab, multiplicity] : groups) {
             ////
             //
             const auto [a, b] = ab;
+            rch += std::max(a, b);
+            const std::uint64_t jmax = std::min(r_adj, rch);
             for (std::uint64_t k = 0; k < multiplicity; ++k) {
                 ////
                 //
-                std::uint64_t wa = 0;
-                std::uint64_t wb = 0;
-                for (std::uint64_t j = 0; j <= r_adj; ++j) {
+                std::uint64_t wa = 0, wb = 0;
+                for (std::uint64_t j = 0; j <= jmax; ++j) {
                     if (j > 0) {
                         if (j > a) {
                             wa -= crt[j - a - 1];
@@ -484,9 +507,8 @@ namespace rmb {
     ) {
         ////
         //
-        std::vector<std::uint64_t> a(d), b(d);
         std::uint64_t md = 0;
-        create_md(md, a, b, d, km, kp, c);
+        create_md(md, d, km, kp, c);
 
         //
         std::uint64_t r_adj = std::min(r, md);
@@ -549,8 +571,8 @@ namespace rmb {
         std::uint64_t r_adj = std::min(r, md);
 
         //
-        std::vector<std::vector<std::uint64_t>> ss, costs, weights;
-        choices_grp(ss, costs, weights, groups, r_adj); 
+        std::vector<std::vector<Choice>> choices;
+        choices_grp(choices, groups, r_adj);
 
         ////
         //
@@ -566,10 +588,11 @@ namespace rmb {
             ////
             //
             std::uint64_t s = 0, cost = 0, weight = 1;
-            for (std::size_t i = 0; i < indices.size(); ++i) {
-                s += ss[i][indices[i]];
-                cost += costs[i][indices[i]];
-                weight *= weights[i][indices[i]];
+            for (std::size_t i = 0; i < indices.size(); i++) {
+                Choice & choice = choices[i][indices[i]];
+                s += choice.s;
+                cost += choice.cost;
+                weight *= choice.weight;
             }
 
             //
@@ -585,7 +608,7 @@ namespace rmb {
 
             //
             for (std::uint64_t i = 0; i < indices.size(); ++i) {
-                if (++indices[i] < ss[i].size()) {
+                if (indices[i]++ < choices[i].size()) {
                     break;
                 }
 
