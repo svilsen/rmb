@@ -5,11 +5,12 @@
 
 PYBIND11_MODULE(_core, m) {
     m.def("bruteforce", &rmb::bruteforce);
+    m.def("delannoy", &rmb::delannoy);
     m.def("exact", &rmb::exact);
+    m.def("exact_grp", &rmb::exact_grp);
     m.def("dp", &rmb::dp);
+    m.def("dp_grp", &rmb::dp_grp);
     m.def("approximate", &rmb::approximate);
-    m.def("grouped_exact", &rmb::grouped_exact);
-    m.def("grouped_dp", &rmb::grouped_dp);
-    m.def("grouped_approximate", &rmb::grouped_approximate);
+    m.def("approximate_grp", &rmb::approximate_grp);
 }
 
