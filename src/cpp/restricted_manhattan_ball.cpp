@@ -23,7 +23,7 @@ namespace rmb {
         unsigned __int128 res = 1;
         for (std::uint64_t i = 1; i <= k; i++) {
             unsigned __int128 mult_i = static_cast<unsigned __int128>((n - k + i) / i); 
-            res *= mult_i;
+            res = res * (n - k + i) / i;
         }
 
         return static_cast<std::uint64_t>(res);
@@ -454,10 +454,12 @@ namespace rmb {
             ////
             //
             const auto [a, b] = ab;
-            rch += std::max(a, b);
-            const std::uint64_t jmax = std::min(r_adj, rch);
             for (std::uint64_t k = 0; k < multiplicity; k++) {
                 ////
+                //
+                rch += std::max(a, b);
+                const std::uint64_t jmax = std::min(r_adj, rch);
+
                 //
                 std::uint64_t wa = 0, wb = 0;
                 for (std::uint64_t j = 0; j <= jmax; j++) {
