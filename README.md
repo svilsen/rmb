@@ -81,7 +81,7 @@ cmake -S . -B build
 cmake --build build
 ```
 
-This builds both the C++ library and the `Python`` extension. Thus, `Python` and `pybind11` must be available to CMake. For a C++-only build, see [Using the C++ library directly](#using-the-c-library-directly).
+This builds both the C++ library and the `Python` extension. Thus, `Python` and `pybind11` must be available to CMake. For a C++-only build, see [Using the C++ library directly](#using-the-c-library-directly).
 
 ## Project status
 `rmb` is at version 0.1.0 and is marked **alpha** (`Development Status :: 3 - Alpha`). The API may change between releases.
