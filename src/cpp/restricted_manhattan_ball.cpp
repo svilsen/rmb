@@ -31,7 +31,7 @@ namespace rmb {
 
     //
     std::uint64_t delannoy(
-        const std::uint64_t & m, 
+        const std::uint64_t & m,
         const std::uint64_t & n
     ) {
         std::uint64_t s = 0;
@@ -73,7 +73,7 @@ namespace rmb {
         const std::vector<std::uint64_t> & kp,
         const std::vector<std::int64_t> & c
     ) {
-        for (std::uint64_t i = 0; i < d; ++i) {
+        for (std::uint64_t i = 0; i < d; i++) {
             std::uint64_t a = km[i] + c[i];
             std::uint64_t b = kp[i] - c[i];
 
@@ -92,7 +92,7 @@ namespace rmb {
         const std::vector<std::uint64_t> & kp,
         const std::vector<std::int64_t> & c
     ) {
-        for (std::uint64_t i = 0; i < d; ++i) {
+        for (std::uint64_t i = 0; i < d; i++) {
             _a[i] = km[i] + c[i];
             _b[i] = kp[i] - c[i];
 
@@ -117,7 +117,7 @@ namespace rmb {
         const std::vector<std::uint64_t> & kp,
         const std::vector<std::int64_t> & c
     ) {
-        for (std::uint64_t i = 0; i < d; ++i) {
+        for (std::uint64_t i = 0; i < d; i++) {
             std::uint64_t a = km[i] + c[i];
             std::uint64_t b = kp[i] - c[i];
 
@@ -316,7 +316,7 @@ namespace rmb {
 
         //
         std::vector<std::vector<Choice>> choices;
-        choices_grp(choices, groups, r_adj); 
+        choices_grp(choices, groups, r_adj);
 
         ////
         //
@@ -329,7 +329,7 @@ namespace rmb {
             ////
             //
             std::uint64_t s = 0, cost = 0, weight = 1;
-            for (std::size_t i = 0; i < indices.size(); ++i) {
+            for (std::size_t i = 0; i < indices.size(); i++) {
                 Choice & choice = choices[i][indices[i]];
                 s += choice.s;
                 cost += choice.cost;
@@ -347,7 +347,7 @@ namespace rmb {
             }
 
             //
-            for (std::size_t i = 0; i < indices.size(); ++i) {
+            for (std::size_t i = 0; i < indices.size(); i++) {
                 if (++indices[i] < choices[i].size()) {
                     break;
                 }
@@ -456,11 +456,11 @@ namespace rmb {
             const auto [a, b] = ab;
             rch += std::max(a, b);
             const std::uint64_t jmax = std::min(r_adj, rch);
-            for (std::uint64_t k = 0; k < multiplicity; ++k) {
+            for (std::uint64_t k = 0; k < multiplicity; k++) {
                 ////
                 //
                 std::uint64_t wa = 0, wb = 0;
-                for (std::uint64_t j = 0; j <= jmax; ++j) {
+                for (std::uint64_t j = 0; j <= jmax; j++) {
                     if (j > 0) {
                         if (j > a) {
                             wa -= crt[j - a - 1];
@@ -607,7 +607,7 @@ namespace rmb {
             }
 
             //
-            for (std::uint64_t i = 0; i < indices.size(); ++i) {
+            for (std::uint64_t i = 0; i < indices.size(); i++) {
                 if (indices[i]++ < choices[i].size()) {
                     break;
                 }
